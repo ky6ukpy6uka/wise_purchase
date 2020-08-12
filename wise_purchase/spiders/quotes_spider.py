@@ -26,7 +26,7 @@ class QuotesSpider(scrapy.Spider):
         for brand in response.css(stats['brand']):
             title = brand.css(stats['brand_title']).get().lower()
             if search == title:
-                link = brand.css(stats['brand_link']).get()
+                link = brand.css(stats['brand_link']).get() + '/all'
                 url += link
                 break
         if url == stats['base_page']:
@@ -38,8 +38,9 @@ class QuotesSpider(scrapy.Spider):
         stats = Shops.config[shop]
         for quote in response.css(stats['item']):
             if self.shop == 'lamoda':
-                prices = [quote.css(stats[i]).get() for i in('item_price_act','item_price_new','item_price')]
-                price = min(re.sub('^ +',"",i) for i in prices if i)
+                prices = [quote.css(stats[i]).get() for i in (
+                    'item_price_act', 'item_price_new', 'item_price')]
+                price = min(re.sub('^ +', "", i) for i in prices if i)
                 print(f'---------------{prices}---------------')
                 self.price = f"{price}{quote.css(stats['currency']).get()}"
                 self.link = stats['base_page']
@@ -48,10 +49,10 @@ class QuotesSpider(scrapy.Spider):
                 self.price = price
                 self.link = ''
             yield {
-                'price' : self.price,
-                'brand name' : re.sub('\n +',"",quote.css(stats['item_brand']).get()),
-                'specification' : re.sub('\n +',"",quote.css(stats['item_spec']).get()),
-                'link' : f"{self.link}{quote.css(stats['item_link']).get()}"
+                'price': self.price,
+                'brand name': re.sub('\n +', "", quote.css(stats['item_brand']).get()),
+                'specification': re.sub('\n +', "", quote.css(stats['item_spec']).get()),
+                'link': f"{self.link}{quote.css(stats['item_link']).get()}"
             }
         next_page = None
         if self.shop == 'lamoda':
